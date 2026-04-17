@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ventas ML — CELUTODO</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0f;
+  --surface: #171717;
+  --surface2: #1f1f1f;
+  --border: #2a2a2a;
+  --border2: #333;
+  --text: #e8e8e8;
+  --muted: #666;
+  --muted2: #444;
+  --att: #4a9eff;
+  --telcel: #4ecb8d;
+  --bait: #f4a544;
+  --otros: #c97bff;
+  --green: #4ecb8d;
+  --accent: #e8e8e8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh}
+.mono{font-family:'DM Mono',monospace}
+
+header{padding:28px 32px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;flex-direction:column;gap:4px}
+.brand-name{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:400}
+.brand-title{font-size:22px;font-weight:300;letter-spacing:-.02em;color:var(--text)}
+.brand-title span{color:var(--muted)}
+.header-right{display:flex;align-items:center;gap:12px;padding-bottom:28px}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.sync-label{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.05em}
+.refresh-btn{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);background:transparent;border:1px solid var(--border2);padding:5px 12px;border-radius:4px;cursor:pointer;transition:all .15s;letter-spacing:.05em}
+.refresh-btn:hover{color:var(--text);border-color:var(--muted)}
+
+.tabs-bar{padding:0 32px;border-bottom:1px solid var(--border);display:flex;gap:0;overflow-x:auto}
+.tab{font-size:12px;font-family:'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:14px 20px;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;background:transparent;border-top:none;border-left:none;border-right:none}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--text);border-bottom-color:var(--text)}
+
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
+.metric{background:var(--surface);padding:20px 24px}
+.metric-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-family:'DM Mono',monospace}
+.metric-value{font-size:26px;font-weight:300;letter-spacing:-.03em;line-height:1}
+.metric-sub{font-size:11px;color:var(--muted);margin-top:5px;font-family:'DM Mono',monospace}
+
+.table-container{padding:0 32px 40px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;margin-top:0}
+thead tr{border-bottom:1px solid var(--border2)}
+th{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:14px 16px;text-align:right;font-family:'DM Mono',monospace;white-space:nowrap}
+th:first-child{text-align:left;width:110px}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:hover{background:var(--surface)}
+tbody tr.total-row{background:var(--surface2);border-top:1px solid var(--border2);border-bottom:none}
+td{padding:10px 16px;text-align:right;font-family:'DM Mono',monospace;font-size:12px;color:var(--text)}
+td:first-child{text-align:left;color:var(--muted);font-size:11px;letter-spacing:.04em}
+tbody tr.total-row td{color:var(--text);font-weight:500}
+.att-val{color:var(--att)}
+.telcel-val{color:var(--telcel)}
+.bait-val{color:var(--bait)}
+.otros-val{color:var(--otros)}
+.zero{color:var(--muted2)}
+.neta-val{color:var(--green)}
+.bar-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:3px;min-width:110px}
+.bar-track{width:80px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+.bar-fill{height:100%;background:var(--green);border-radius:2px;opacity:.6;transition:width .3s ease}
+
+.loading{display:flex;align-items:center;justify-content:center;height:200px;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.08em;gap:10px}
+.spinner{width:16px;height:16px;border:1.5px solid var(--border2);border-top-color:var(--muted);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error{padding:32px;color:#e24b4a;font-family:'DM Mono',monospace;font-size:12px;text-align:center}
+.legend{display:flex;gap:20px;padding:16px 32px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:11px;font-family:'DM Mono',monospace;color:var(--muted)}
+.leg-dot{width:8px;height:8px;border-radius:2px}
+
+@media(max-width:640px){
+  header{padding:20px 16px 0}
+  .tabs-bar{padding:0 16px}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .table-container{padding:0 16px 32px}
+  .legend{padding:12px 16px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-name">Dashboard · Mercado Libre</div>
+    <div class="brand-title">Ventas <span>/ CELUTODO</span></div>
+  </div>
+  <div class="header-right">
+    <div class="sync-dot"></div>
+    <span class="sync-label" id="last-sync">Sincronizando...</span>
+    <button class="refresh-btn" onclick="loadData()">↻ Actualizar</button>
+  </div>
+</header>
+
+<div class="tabs-bar" id="tabs-bar"></div>
+
+<div class="metrics" id="metrics">
+  <div class="metric"><div class="loading"><div class="spinner"></div>Cargando datos</div></div>
+</div>
+
+<div class="legend">
+  <div class="leg-item"><div class="leg-dot" style="background:var(--att)"></div>ATT</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--telcel)"></div>Telcel</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--bait)"></div>BAIT</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--otros)"></div>Otros</div>
+  <div class="leg-item" style="margin-left:auto"><div class="leg-dot" style="background:var(--green)"></div>Util. neta</div>
+</div>
+
+<div class="table-container">
+  <div id="table-area" class="loading"><div class="spinner"></div>Cargando...</div>
+</div>
+
+<script>
+const SHEET_ID = '1DsJpujHO15hOpGoTZVkRGXlqo64cXRlggV9omrK3BIE';
+const SHEET_NAME = 'ventas_ml';
+const FAMILIAS = ['ATT','TELCEL','BAIT','OTROS'];
+const FAM_KEYS = {ATT:'att',TELCEL:'telcel',BAIT:'bait',OTROS:'otros'};
+const MESES = {1:'Enero',2:'Febrero',3:'Marzo',4:'Abril',5:'Mayo',6:'Junio',7:'Julio',8:'Agosto',9:'Septiembre',10:'Octubre',11:'Noviembre',12:'Diciembre'};
+
+let allData = {};
+let activeMonth = null;
+
+function fmt(n){return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',minimumFractionDigits:2,maximumFractionDigits:2}).format(n)}
+function fmtInt(n){return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',minimumFractionDigits:0,maximumFractionDigits:0}).format(n)}
+
+function parseCSV(text){
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim());
+  return lines.slice(1).map(line=>{
+    const vals = [];
+    let cur='',inQ=false;
+    for(let i=0;i<line.length;i++){
+      if(line[i]==='"'){inQ=!inQ}
+      else if(line[i]===',' && !inQ){vals.push(cur);cur=''}
+      else{cur+=line[i]}
+    }
+    vals.push(cur);
+    const row={};
+    headers.forEach((h,i)=>row[h]=(vals[i]||'').trim());
+    return row;
+  });
+}
+
+function processData(rows){
+  const byMonth={};
+  rows.forEach(r=>{
+    const fecha2 = r['Fecha 2']||'';
+    if(!fecha2) return;
+    const parts = fecha2.split('/');
+    if(parts.length<3) return;
+    const d=parseInt(parts[0]),m=parseInt(parts[1]),y=parseInt(parts[2]);
+    const key=`${y}-${String(m).padStart(2,'0')}`;
+    const label=`${MESES[m]} ${y}`;
+    const familia=(r['Familia']||'OTROS').toUpperCase();
+    const unidades=parseInt(r['Unidades'])||0;
+    const utilNeta=parseFloat(r['Util Neta'])||0;
+    if(!byMonth[key]) byMonth[key]={label,rows:{}};
+    if(!byMonth[key].rows[fecha2]) byMonth[key].rows[fecha2]={fecha:fecha2,ts:new Date(y,m-1,d).getTime(),ATT:0,TELCEL:0,BAIT:0,OTROS:0,util_neta:0};
+    const fam = FAMILIAS.includes(familia)?familia:'OTROS';
+    byMonth[key].rows[fecha2][fam]+=unidades;
+    byMonth[key].rows[fecha2].util_neta+=utilNeta;
+  });
+  const result={};
+  Object.keys(byMonth).sort().forEach(k=>{
+    result[k]={label:byMonth[k].label,rows:Object.values(byMonth[k].rows).sort((a,b)=>b.ts-a.ts)};
+    result[k].rows.forEach(r=>r.util_neta=Math.round(r.util_neta*100)/100);
+  });
+  return result;
+}
+
+function renderTabs(){
+  const bar=document.getElementById('tabs-bar');
+  bar.innerHTML=Object.entries(allData).map(([k,v])=>
+    `<button class="tab${k===activeMonth?' active':''}" onclick="setMonth('${k}')">${v.label}</button>`
+  ).join('');
+}
+
+function renderMetrics(rows){
+  const totAtt=rows.reduce((s,r)=>s+r.ATT,0);
+  const totTel=rows.reduce((s,r)=>s+r.TELCEL,0);
+  const totBait=rows.reduce((s,r)=>s+r.BAIT,0);
+  const totOtros=rows.reduce((s,r)=>s+r.OTROS,0);
+  const totUnits=totAtt+totTel+totBait+totOtros;
+  const totNeta=rows.reduce((s,r)=>s+r.util_neta,0);
+  const dias=rows.length;
+  document.getElementById('metrics').innerHTML=`
+    <div class="metric">
+      <div class="metric-label">Utilidad neta</div>
+      <div class="metric-value neta-val mono">${fmtInt(totNeta)}</div>
+      <div class="metric-sub">${dias} días · ${fmtInt(totNeta/dias)}/día</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total unidades</div>
+      <div class="metric-value mono">${totUnits.toLocaleString('es-MX')}</div>
+      <div class="metric-sub">${Math.round(totUnits/dias)} unidades/día prom.</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">ATT</div>
+      <div class="metric-value att-val mono">${totAtt}</div>
+      <div class="metric-sub">${totUnits?Math.round(totAtt/totUnits*100):0}% del total · Telcel ${totTel}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">BAIT + Otros</div>
+      <div class="metric-value mono">${totBait+totOtros}</div>
+      <div class="metric-sub">BAIT ${totBait} · Otros ${totOtros}</div>
+    </div>`;
+}
+
+function renderTable(rows){
+  const maxNeta=Math.max(...rows.map(r=>r.util_neta),1);
+  const totals={ATT:0,TELCEL:0,BAIT:0,OTROS:0,util_neta:0};
+  rows.forEach(r=>{FAMILIAS.forEach(f=>totals[f]+=r[f]);totals.util_neta+=r.util_neta;});
+  const totUnitsTotal=FAMILIAS.reduce((s,f)=>s+totals[f],0);
+
+  document.getElementById('table-area').innerHTML=`
+  <table>
+    <thead><tr>
+      <th>Fecha</th>
+      <th class="att-val">ATT</th>
+      <th class="telcel-val">Telcel</th>
+      <th class="bait-val">BAIT</th>
+      <th class="otros-val">Otros</th>
+      <th>Total</th>
+      <th style="min-width:130px">Util. neta</th>
+    </tr></thead>
+    <tbody>
+    ${rows.map(r=>{
+      const tot=FAMILIAS.reduce((s,f)=>s+r[f],0);
+      const pct=Math.round(r.util_neta/maxNeta*100);
+      return `<tr>
+        <td>${r.fecha}</td>
+        <td class="${r.ATT?'att-val':'zero'}">${r.ATT||'—'}</td>
+        <td class="${r.TELCEL?'telcel-val':'zero'}">${r.TELCEL||'—'}</td>
+        <td class="${r.BAIT?'bait-val':'zero'}">${r.BAIT||'—'}</td>
+        <td class="${r.OTROS?'otros-val':'zero'}">${r.OTROS||'—'}</td>
+        <td>${tot}</td>
+        <td><div class="bar-wrap">
+          <span class="neta-val">${fmt(r.util_neta)}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        </div></td>
+      </tr>`;
+    }).join('')}
+    <tr class="total-row">
+      <td>Total mes</td>
+      <td class="att-val">${totals.ATT}</td>
+      <td class="telcel-val">${totals.TELCEL}</td>
+      <td class="bait-val">${totals.BAIT}</td>
+      <td class="otros-val">${totals.OTROS}</td>
+      <td>${totUnitsTotal}</td>
+      <td class="neta-val">${fmt(totals.util_neta)}</td>
+    </tr>
+    </tbody>
+  </table>`;
+}
+
+function setMonth(k){
+  activeMonth=k;
+  renderTabs();
+  const rows=allData[k].rows;
+  renderMetrics(rows);
+  renderTable(rows);
+}
+
+async function loadData(){
+  document.getElementById('last-sync').textContent='Sincronizando...';
+  document.getElementById('table-area').innerHTML='<div class="loading"><div class="spinner"></div>Cargando datos...</div>';
+  try{
+    const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+    const res=await fetch(url);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text=await res.text();
+    const rows=parseCSV(text);
+    allData=processData(rows);
+    const months=Object.keys(allData);
+    if(!months.length) throw new Error('Sin datos');
+    if(!activeMonth || !allData[activeMonth]) activeMonth=months[months.length-1];
+    renderTabs();
+    setMonth(activeMonth);
+    const now=new Date();
+    document.getElementById('last-sync').textContent=`Actualizado ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+  }catch(e){
+    document.getElementById('metrics').innerHTML='';
+    document.getElementById('table-area').innerHTML=`<div class="error">Error al cargar datos: ${e.message}<br><br>Verifica que el sheet sea público (Compartir → Cualquier persona con el enlace → Lector)</div>`;
+    document.getElementById('last-sync').textContent='Error de conexión';
+  }
+}
+
+loadData();
+setInterval(loadData, 60*60*1000);
+</script>
+</body>
+</html>
